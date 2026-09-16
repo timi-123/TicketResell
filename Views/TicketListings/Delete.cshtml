@@ -1,0 +1,37 @@
+@model TicketResell.Models.TicketListing
+
+@{
+    ViewData["Title"] = "Cancel listing";
+}
+
+<a asp-action="Details" asp-route-id="@Model.Id" class="back-link">← Back to listing</a>
+
+<div class="form-narrow">
+    <h1 class="page-title">Cancel this listing?</h1>
+    <p class="page-subtitle">
+        The tickets come off sale straight away. Anyone who already bought from this listing keeps their order.
+    </p>
+
+    <dl class="meta-list">
+        <dt>Event</dt>
+        <dd>@Model.Event?.Title</dd>
+
+        <dt>Date</dt>
+        <dd>@Model.Event?.StartsAt.ToString("ddd d MMM yyyy, HH:mm")</dd>
+
+        <dt>Seat</dt>
+        <dd>@Model.SeatDescription</dd>
+
+        <dt>Price</dt>
+        <dd class="num">@Model.PricePerTicket.ToString("C") per ticket</dd>
+
+        <dt>Still for sale</dt>
+        <dd class="num">@Model.Quantity</dd>
+    </dl>
+
+    <form asp-action="Delete" class="form-actions">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Cancel listing</button>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-link">Keep it</a>
+    </form>
+</div>

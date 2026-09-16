@@ -1,0 +1,111 @@
+@model EventPage
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = Model.Event.Title;
+    var currentUserId = UserManager.GetUserId(User);
+
+    var offerSummary = Model.LowestPrice is decimal lowest
+        ? $"{Model.TotalOffers} {(Model.TotalOffers == 1 ? "listing" : "listings")} · {Model.TicketsAvailable} available · from {lowest:C}"
+        : "Nobody is selling tickets for this event yet.";
+}
+
+<a asp-action="Index" class="back-link">← All events</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@Model.Event.Title</h1>
+        <p class="page-subtitle">
+            @Model.Event.StartsAt.ToString("dddd d MMMM yyyy, HH:mm") · @Model.Event.Venue?.Name, @Model.Event.Venue?.City
+        </p>
+    </div>
+    <a asp-controller="TicketListings" asp-action="Create" asp-route-eventId="@Model.Event.Id" class="btn btn-secondary">Sell tickets</a>
+</div>
+
+<p class="prose">@Model.Event.Description</p>
+
+@if (!Model.IsUpcoming)
+{
+    <div class="empty">This event has already taken place.</div>
+}
+else
+{
+    <div class="offers-head">
+        <div>
+            <h2 class="section-title">Tickets</h2>
+            <p class="result-count mb-0">@offerSummary</p>
+        </div>
+        @if (Model.TotalOffers > 0)
+        {
+            <form method="get" class="quantity-filter">
+                <input type="hidden" name="id" value="@Model.Event.Id" />
+                <label for="minQuantity" class="form-label">Tickets together</label>
+                <div class="d-flex gap-2">
+                    <select id="minQuantity" name="minQuantity" class="form-select">
+                        @for (var n = 1; n <= 6; n++)
+                        {
+                            <option value="@n" selected="@(Model.MinQuantity == n)">@(n == 1 ? "Any" : n + "+")</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-secondary">Apply</button>
+                </div>
+            </form>
+        }
+    </div>
+
+    @if (!Model.Offers.Any())
+    {
+        if (Model.TotalOffers > 0)
+        {
+            <div class="empty">
+                <span>No listing has @Model.MinQuantity tickets together.</span>
+                <a asp-action="Details" asp-route-id="@Model.Event.Id">Show every listing</a>
+            </div>
+        }
+        else
+        {
+            <div class="empty">
+                <span>Be the first to list tickets for this event.</span>
+                <a asp-controller="TicketListings" asp-action="Create" asp-route-eventId="@Model.Event.Id">Sell tickets</a>
+            </div>
+        }
+    }
+    else
+    {
+        <ul class="event-list">
+            @foreach (var offer in Model.Offers)
+            {
+                <li class="offer-row">
+                    <div>
+                        <a class="offer-seat" asp-controller="TicketListings" asp-action="Details" asp-route-id="@offer.Id">@offer.SeatDescription</a>
+                        <p class="event-meta">
+                            @if (offer.SellerId == currentUserId)
+                            {
+                                <span>Your listing</span>
+                            }
+                            else
+                            {
+                                <span>Sold by @offer.Seller?.FirstName @offer.Seller?.LastName</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="event-aside">
+                        <div class="price">@offer.PricePerTicket.ToString("C")</div>
+                        <div class="price-note">@offer.Quantity @(offer.Quantity == 1 ? "ticket" : "tickets") left</div>
+                    </div>
+                    <div class="row-action">
+                        @if (offer.SellerId == currentUserId)
+                        {
+                            <a asp-controller="TicketListings" asp-action="Details" asp-route-id="@offer.Id" class="btn btn-sm btn-secondary">Manage</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Orders" asp-action="Buy" asp-route-id="@offer.Id" class="btn btn-sm btn-primary">Buy</a>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}

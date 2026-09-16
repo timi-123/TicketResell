@@ -1,0 +1,161 @@
+@model EventSearch
+
+@{
+    ViewData["Title"] = "Events";
+
+    var routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrWhiteSpace(Model.Query)) routeData["q"] = Model.Query;
+    if (Model.CategoryId != null) routeData["categoryId"] = Model.CategoryId.Value.ToString();
+    if (!string.IsNullOrWhiteSpace(Model.City)) routeData["city"] = Model.City;
+    if (Model.From != null) routeData["from"] = Model.From.Value.ToString("yyyy-MM-dd");
+    if (Model.To != null) routeData["to"] = Model.To.Value.ToString("yyyy-MM-dd");
+    if (Model.Sort != "date") routeData["sort"] = Model.Sort;
+
+    var firstPage = Math.Max(1, Math.Min(Model.Page - 3, Model.PageCount - 6));
+    var lastPage = Math.Min(Model.PageCount, firstPage + 6);
+
+    var previousPage = Model.Page - 1;
+    var nextPage = Model.Page + 1;
+
+    var fromValue = Model.From?.ToString("yyyy-MM-dd");
+    var toValue = Model.To?.ToString("yyyy-MM-dd");
+
+    var basePath = Url.Action("Index", "Events");
+    var carriedQuery = string.Join("&", routeData.Select(entry =>
+        $"{Uri.EscapeDataString(entry.Key)}={Uri.EscapeDataString(entry.Value)}"));
+
+    string PageUrl(int page)
+    {
+        var prefix = carriedQuery.Length > 0 ? carriedQuery + "&" : string.Empty;
+        return $"{basePath}?{prefix}page={page}";
+    }
+
+    var countLabel = $"{Model.TotalCount} {(Model.TotalCount == 1 ? "event" : "events")}";
+    if (Model.PageCount > 1)
+    {
+        countLabel += $" · page {Model.Page} of {Model.PageCount}";
+    }
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Events</h1>
+        <p class="page-subtitle">Find your event, then pick a seat from the people selling.</p>
+    </div>
+</div>
+
+<form method="get" class="filters">
+    <div class="filter-wide">
+        <label for="q" class="form-label">Search</label>
+        <input type="search" id="q" name="q" value="@Model.Query" class="form-control" placeholder="Event, venue or city" />
+    </div>
+    <div>
+        <label for="categoryId" class="form-label">Category</label>
+        <select id="categoryId" name="categoryId" class="form-select">
+            <option value="">Any</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="city" class="form-label">City</label>
+        <select id="city" name="city" class="form-select">
+            <option value="">Any</option>
+            @foreach (var city in Model.Cities)
+            {
+                <option value="@city" selected="@(Model.City == city)">@city</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="from" class="form-label">From</label>
+        <input type="date" id="from" name="from" value="@fromValue" class="form-control" />
+    </div>
+    <div>
+        <label for="to" class="form-label">To</label>
+        <input type="date" id="to" name="to" value="@toValue" class="form-control" />
+    </div>
+    <div>
+        <label for="sort" class="form-label">Sort by</label>
+        <select id="sort" name="sort" class="form-select">
+            <option value="date" selected="@(Model.Sort == "date")">Date</option>
+            <option value="price" selected="@(Model.Sort == "price")">Cheapest</option>
+        </select>
+    </div>
+    <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">Search</button>
+        @if (Model.HasFilters)
+        {
+            <a asp-action="Index" class="btn btn-link">Clear</a>
+        }
+    </div>
+</form>
+
+@if (Model.TotalCount == 0)
+{
+    <div class="empty">
+        <span>No events match that search.</span>
+        @if (Model.HasFilters)
+        {
+            <span><a asp-action="Index">Clear the filters</a> and try again.</span>
+        }
+    </div>
+}
+else
+{
+    <p class="result-count">@countLabel</p>
+
+    <ul class="event-list">
+        @foreach (var item in Model.Results)
+        {
+            var e = item.Event;
+            <li>
+                <a class="event-row" asp-action="Details" asp-route-id="@e.Id">
+                    <div class="date-tile">
+                        <span class="day">@e.StartsAt.Day</span>
+                        <span class="month">@e.StartsAt.ToString("MMM")</span>
+                    </div>
+                    <div>
+                        <p class="event-title">@e.Title</p>
+                        <p class="event-meta">@e.Category?.Name · @e.Venue?.Name, @e.Venue?.City · @e.StartsAt.ToString("ddd HH:mm")</p>
+                    </div>
+                    <div class="event-aside">
+                        @if (item.LowestPrice is decimal lowest)
+                        {
+                            <div class="price">from @lowest.ToString("C")</div>
+                            <div class="price-note">@item.TicketsAvailable @(item.TicketsAvailable == 1 ? "ticket" : "tickets")</div>
+                        }
+                        else
+                        {
+                            <div class="price-note">No tickets yet</div>
+                        }
+                    </div>
+                </a>
+            </li>
+        }
+    </ul>
+
+    @if (Model.PageCount > 1)
+    {
+        <nav class="pagination-row" aria-label="Pages">
+            <div class="page-links">
+                @if (Model.Page > 1)
+                {
+                    <a class="page-link-box" href="@PageUrl(previousPage)">Previous</a>
+                }
+                @for (var p = firstPage; p <= lastPage; p++)
+                {
+                    var pageClass = p == Model.Page ? "page-link-box current" : "page-link-box";
+                    var pageUrl = PageUrl(p);
+                    <a class="@pageClass" href="@pageUrl">@p</a>
+                }
+                @if (Model.Page < Model.PageCount)
+                {
+                    <a class="page-link-box" href="@PageUrl(nextPage)">Next</a>
+                }
+            </div>
+        </nav>
+    }
+}

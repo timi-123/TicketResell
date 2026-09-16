@@ -1,0 +1,79 @@
+@model AdminDashboard
+
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Admin</h1>
+        <p class="page-subtitle">The catalogue and what's happening on the site.</p>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat">
+        <div class="stat-value num">@Model.UpcomingEvents</div>
+        <div class="stat-label">Upcoming events · @Model.TotalEvents total</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value num">@Model.ActiveListings</div>
+        <div class="stat-label">Listings on sale</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value num">@Model.PaidOrders</div>
+        <div class="stat-label">Paid orders · @Model.PendingOrders unpaid</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value num">@Model.GrossSales.ToString("C")</div>
+        <div class="stat-label">Gross sales · @Model.Commission.ToString("C") commission</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value num">@Model.Users</div>
+        <div class="stat-label">Registered users</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value num">@Model.Venues / @Model.Categories</div>
+        <div class="stat-label">Venues / categories</div>
+    </div>
+</div>
+
+<h2 class="section-title mt-5">Manage</h2>
+<ul class="event-list">
+    <li>
+        <a class="event-row admin-row" asp-controller="AdminEvents" asp-action="Index">
+            <div>
+                <p class="event-title">Events</p>
+                <p class="event-meta">Add, edit or remove events in the catalogue.</p>
+            </div>
+            <div class="event-aside price-note">@Model.TotalEvents</div>
+        </a>
+    </li>
+    <li>
+        <a class="event-row admin-row" asp-controller="AdminVenues" asp-action="Index">
+            <div>
+                <p class="event-title">Venues</p>
+                <p class="event-meta">Places events happen, with city and capacity.</p>
+            </div>
+            <div class="event-aside price-note">@Model.Venues</div>
+        </a>
+    </li>
+    <li>
+        <a class="event-row admin-row" asp-controller="AdminCategories" asp-action="Index">
+            <div>
+                <p class="event-title">Categories</p>
+                <p class="event-meta">Concert, sports, theatre and the rest.</p>
+            </div>
+            <div class="event-aside price-note">@Model.Categories</div>
+        </a>
+    </li>
+    <li>
+        <a class="event-row admin-row" asp-action="Listings">
+            <div>
+                <p class="event-title">Listings</p>
+                <p class="event-meta">Review what people are selling and take listings down.</p>
+            </div>
+            <div class="event-aside price-note">@Model.ActiveListings</div>
+        </a>
+    </li>
+</ul>

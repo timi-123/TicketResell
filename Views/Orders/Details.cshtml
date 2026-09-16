@@ -1,0 +1,134 @@
+@model OrderView
+
+@{
+    var order = Model.Order;
+    var listing = order.TicketListing;
+
+    ViewData["Title"] = $"Order {order.Id}";
+
+    var statusClass = order.OrderStatus.ToString().ToLowerInvariant();
+    var backAction = Model.IsBuyer ? "MyOrders" : "Sales";
+    var backLabel = Model.IsBuyer ? "My orders" : "My sales";
+    var canRefund = order.OrderStatus == OrderStatus.Paid || order.OrderStatus == OrderStatus.Delivered;
+    var showTickets = order.TicketFiles.Any() && (Model.IsSeller || canRefund);
+}
+
+<a asp-action="@backAction" class="back-link">← @backLabel</a>
+
+<div class="detail-grid">
+    <div>
+        <h1 class="page-title">@listing?.Event?.Title</h1>
+        <p class="page-subtitle">
+            @listing?.Event?.StartsAt.ToString("dddd d MMMM yyyy, HH:mm") · @listing?.Event?.Venue?.Name, @listing?.Event?.Venue?.City
+        </p>
+
+        <dl class="meta-list">
+            <dt>Order</dt>
+            <dd class="num">#@order.Id · <span class="status status-@statusClass">@order.OrderStatus</span></dd>
+
+            <dt>Seat</dt>
+            <dd>@listing?.SeatDescription</dd>
+
+            <dt>Tickets</dt>
+            <dd class="num">@order.Quantity</dd>
+
+            <dt>@(Model.IsBuyer ? "Seller" : "Buyer")</dt>
+            <dd>
+                @if (Model.IsBuyer)
+                {
+                    <span>@listing?.Seller?.FirstName @listing?.Seller?.LastName</span>
+                }
+                else
+                {
+                    <span>@order.Buyer?.FirstName @order.Buyer?.LastName</span>
+                }
+            </dd>
+
+            <dt>Ordered</dt>
+            <dd class="num">@order.OrderedAt.ToString("d MMM yyyy, HH:mm")</dd>
+
+            @if (order.PaidAt != null)
+            {
+                <dt>Paid</dt>
+                <dd class="num">@order.PaidAt.Value.ToString("d MMM yyyy, HH:mm") · @order.PaymentReference</dd>
+            }
+
+            @if (order.DeliveredAt != null)
+            {
+                <dt>Tickets sent</dt>
+                <dd class="num">@order.DeliveredAt.Value.ToString("d MMM yyyy, HH:mm")</dd>
+            }
+
+            @if (order.RefundedAt != null)
+            {
+                <dt>Refunded</dt>
+                <dd class="num">@order.RefundedAt.Value.ToString("d MMM yyyy, HH:mm")</dd>
+            }
+        </dl>
+
+        @if (showTickets)
+        {
+            <h2 class="section-title mt-5">Tickets</h2>
+            <ul class="file-list">
+                @foreach (var file in order.TicketFiles.OrderBy(f => f.UploadedAt))
+                {
+                    var sizeLabel = file.SizeBytes < 1024
+                        ? $"{file.SizeBytes} B"
+                        : $"{Math.Round(file.SizeBytes / 1024d)} KB";
+                    var sentOn = file.UploadedAt.ToString("d MMM");
+                    <li>
+                        <a asp-action="Download" asp-route-id="@file.Id">@file.FileName</a>
+                        <span class="subtle">@sizeLabel · sent @sentOn</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <aside class="panel">
+        <dl class="cost-list">
+            <dt>@order.Quantity × @listing?.PricePerTicket.ToString("C")</dt>
+            <dd class="num">@order.SubtotalPrice.ToString("C")</dd>
+
+            @if (Model.IsBuyer)
+            {
+                <dt>Booking fee</dt>
+                <dd class="num">@order.BuyerFee.ToString("C")</dd>
+            }
+            else
+            {
+                <dt>Commission</dt>
+                <dd class="num">−@order.SellerCommission.ToString("C")</dd>
+            }
+        </dl>
+
+        <div class="total-row">
+            <span class="muted">@(Model.IsBuyer ? "Total paid" : "Your payout")</span>
+            <span class="panel-price">@((Model.IsBuyer ? order.TotalPrice : order.SellerPayout).ToString("C"))</span>
+        </div>
+
+        <div class="panel-actions">
+            @if (Model.IsBuyer && order.OrderStatus == OrderStatus.Pending)
+            {
+                <a asp-action="Checkout" asp-route-id="@order.Id" class="btn btn-primary">Pay now</a>
+                <form asp-action="Cancel" asp-route-id="@order.Id" method="post">
+                    <button type="submit" class="btn btn-quiet-danger w-100">Cancel order</button>
+                </form>
+            }
+
+            @if (Model.IsSeller && (order.OrderStatus == OrderStatus.Paid || order.OrderStatus == OrderStatus.Delivered))
+            {
+                <a asp-action="Deliver" asp-route-id="@order.Id" class="btn btn-primary">
+                    @(order.OrderStatus == OrderStatus.Paid ? "Send tickets" : "Send more tickets")
+                </a>
+            }
+
+            @if (Model.IsSeller && canRefund)
+            {
+                <form asp-action="Refund" asp-route-id="@order.Id" method="post">
+                    <button type="submit" class="btn btn-quiet-danger w-100">Refund buyer</button>
+                </form>
+            }
+        </div>
+    </aside>
+</div>

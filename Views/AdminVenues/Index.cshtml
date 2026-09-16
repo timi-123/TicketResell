@@ -1,0 +1,57 @@
+@model IEnumerable<TicketResell.Models.Venue>
+
+@{
+    ViewData["Title"] = "Venues";
+}
+
+<a asp-controller="Admin" asp-action="Index" class="back-link">← Admin</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Venues</h1>
+        <p class="page-subtitle">Where events happen.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">New venue</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">No venues yet. <a asp-action="Create">Add the first one</a>.</div>
+}
+else
+{
+    <div class="table-scroll">
+        <table class="table-clean">
+            <thead>
+                <tr>
+                    <th>Venue</th>
+                    <th>City</th>
+                    <th class="end">Capacity</th>
+                    <th class="end">Events</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="cell-title">@item.Name</div>
+                        <div class="cell-sub">@item.Address</div>
+                    </td>
+                    <td>@item.City</td>
+                    <td class="end">@item.Capacity</td>
+                    <td class="end">@item.Events.Count</td>
+                    <td class="end text-nowrap">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this venue?');">
+                            <button type="submit" class="btn btn-sm btn-quiet-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

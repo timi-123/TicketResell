@@ -1,0 +1,66 @@
+@model IEnumerable<TicketResell.Models.TicketListing>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "All tickets";
+    var currentUserId = UserManager.GetUserId(User);
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">All tickets</h1>
+        <p class="page-subtitle">Every seat currently for sale, soonest event first.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">Sell tickets</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">
+        There are no tickets for sale right now.
+        <a asp-action="Create">List yours</a>.
+    </div>
+}
+else
+{
+    <ul class="event-list">
+        @foreach (var item in Model)
+        {
+            <li class="event-row listing-row">
+                <div class="date-tile">
+                    <span class="day">@item.Event?.StartsAt.Day</span>
+                    <span class="month">@item.Event?.StartsAt.ToString("MMM")</span>
+                </div>
+                <div>
+                    <a class="event-title" asp-controller="Events" asp-action="Details" asp-route-id="@item.EventId">@item.Event?.Title</a>
+                    <p class="event-meta">@item.Event?.Venue?.Name · @item.SeatDescription</p>
+                    <p class="event-meta">
+                        @if (item.SellerId == currentUserId)
+                        {
+                            @("Your listing")
+                        }
+                        else
+                        {
+                            @($"Sold by {item.Seller?.FirstName} {item.Seller?.LastName}")
+                        }
+                    </p>
+                </div>
+                <div class="event-aside">
+                    <div class="price">@item.PricePerTicket.ToString("C")</div>
+                    <div class="price-note">@item.Quantity @(item.Quantity == 1 ? "ticket" : "tickets") left</div>
+                </div>
+                <div class="row-action">
+                    @if (item.SellerId == currentUserId)
+                    {
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Manage</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Orders" asp-action="Buy" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Buy</a>
+                    }
+                </div>
+            </li>
+        }
+    </ul>
+}

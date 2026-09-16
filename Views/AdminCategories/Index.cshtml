@@ -1,0 +1,52 @@
+@model IEnumerable<TicketResell.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<a asp-controller="Admin" asp-action="Index" class="back-link">← Admin</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Categories</h1>
+        <p class="page-subtitle">How events are grouped for browsing.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">New category</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">No categories yet. <a asp-action="Create">Add the first one</a>.</div>
+}
+else
+{
+    <div class="table-scroll">
+        <table class="table-clean">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th class="end">Events</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="cell-title">@item.Name</td>
+                    <td>@item.Description</td>
+                    <td class="end">@item.Events.Count</td>
+                    <td class="end text-nowrap">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this category?');">
+                            <button type="submit" class="btn btn-sm btn-quiet-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

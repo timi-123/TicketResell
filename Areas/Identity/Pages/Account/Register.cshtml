@@ -1,0 +1,66 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Create account";
+}
+
+<div class="auth">
+    <h1 class="page-title">Create account</h1>
+    <p class="page-subtitle">You need an account to buy or sell tickets.</p>
+
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mt-4">
+        <div asp-validation-summary="ModelOnly" role="alert"></div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+                <label asp-for="Input.FirstName" class="form-label">First name</label>
+                <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" />
+                <span asp-validation-for="Input.FirstName"></span>
+            </div>
+            <div class="col-sm-6">
+                <label asp-for="Input.LastName" class="form-label">Last name</label>
+                <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true" />
+                <span asp-validation-for="Input.LastName"></span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+                <label asp-for="Input.Address" class="form-label">Address</label>
+                <input asp-for="Input.Address" class="form-control" autocomplete="street-address" aria-required="true" />
+                <span asp-validation-for="Input.Address"></span>
+            </div>
+            <div class="col-sm-6">
+                <label asp-for="Input.City" class="form-label">City</label>
+                <input asp-for="Input.City" class="form-control" autocomplete="address-level2" aria-required="true" />
+                <span asp-validation-for="Input.City"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Email" class="form-label">Email</label>
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+            <span asp-validation-for="Input.Email"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.Password" class="form-label">Password</label>
+            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+            <span asp-validation-for="Input.Password"></span>
+        </div>
+        <div class="mb-4">
+            <label asp-for="Input.ConfirmPassword" class="form-label">Confirm password</label>
+            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+            <span asp-validation-for="Input.ConfirmPassword"></span>
+        </div>
+
+        <button id="registerSubmit" type="submit" class="w-100 btn btn-primary">Create account</button>
+    </form>
+
+    <p class="auth-alt">
+        Already have an account? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Log in</a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

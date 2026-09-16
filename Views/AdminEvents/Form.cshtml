@@ -1,0 +1,71 @@
+@model TicketResell.Models.Event
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "New event" : "Edit event";
+    var startsAtValue = Model.StartsAt.ToString("yyyy-MM-ddTHH:mm");
+    var venueItems = (List<SelectListItem>)ViewData["VenueId"]!;
+    var categoryItems = (List<SelectListItem>)ViewData["CategoryId"]!;
+}
+
+<a asp-action="Index" class="back-link">← Events</a>
+
+<div class="form-narrow">
+    <h1 class="page-title">@(isNew ? "New event" : "Edit event")</h1>
+
+    <form method="post" class="mt-4">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Title</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Description"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="StartsAt" class="form-label">Starts</label>
+            <input asp-for="StartsAt" type="datetime-local" value="@startsAtValue" class="form-control" />
+            <span asp-validation-for="StartsAt"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <label asp-for="VenueId" class="form-label">Venue</label>
+                <select asp-for="VenueId" class="form-select">
+                    @foreach (var item in venueItems)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="VenueId"></span>
+            </div>
+            <div class="col-sm-6">
+                <label asp-for="CategoryId" class="form-label">Category</label>
+                <select asp-for="CategoryId" class="form-select">
+                    @foreach (var item in categoryItems)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId"></span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@(isNew ? "Create event" : "Save changes")</button>
+            <a asp-action="Index" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

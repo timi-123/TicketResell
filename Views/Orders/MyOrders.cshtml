@@ -1,0 +1,65 @@
+@model IEnumerable<TicketResell.Models.Order>
+
+@{
+    ViewData["Title"] = "My orders";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My orders</h1>
+        <p class="page-subtitle">Tickets you've bought.</p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">
+        You haven't bought any tickets yet.
+        <a asp-controller="Events" asp-action="Index">Find an event</a>.
+    </div>
+}
+else
+{
+    <div class="table-scroll">
+        <table class="table-clean">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th class="end">Tickets</th>
+                    <th class="end">Total</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="cell-title">@order.TicketListing?.Event?.Title</div>
+                        <div class="cell-sub">@order.TicketListing?.Event?.Venue?.Name · @order.TicketListing?.SeatDescription</div>
+                    </td>
+                    <td>
+                        <div class="num">@order.TicketListing?.Event?.StartsAt.ToString("d MMM yyyy, HH:mm")</div>
+                        <div class="cell-sub">Ordered @order.OrderedAt.ToString("d MMM")</div>
+                    </td>
+                    <td class="end">@order.Quantity</td>
+                    <td class="end">@order.TotalPrice.ToString("C")</td>
+                    <td><span class="status status-@order.OrderStatus.ToString().ToLowerInvariant()">@order.OrderStatus</span></td>
+                    <td class="end text-nowrap">
+                        @if (order.OrderStatus == OrderStatus.Pending)
+                        {
+                            <a asp-action="Checkout" asp-route-id="@order.Id" class="btn btn-sm btn-primary">Pay</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-secondary">View</a>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

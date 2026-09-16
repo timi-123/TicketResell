@@ -1,0 +1,40 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="auth">
+    <h1 class="page-title">Log in</h1>
+    <p class="page-subtitle">Use the email you signed up with.</p>
+
+    <form id="account" method="post" class="mt-4">
+        <div asp-validation-summary="ModelOnly" role="alert"></div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Email" class="form-label">Email</label>
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+            <span asp-validation-for="Input.Email"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.Password" class="form-label">Password</label>
+            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" />
+            <span asp-validation-for="Input.Password"></span>
+        </div>
+        <div class="form-check mb-4">
+            <input class="form-check-input" asp-for="Input.RememberMe" />
+            <label asp-for="Input.RememberMe" class="form-check-label">Keep me logged in</label>
+        </div>
+
+        <button id="login-submit" type="submit" class="w-100 btn btn-primary">Log in</button>
+    </form>
+
+    <p class="auth-alt">
+        New here? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create an account</a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

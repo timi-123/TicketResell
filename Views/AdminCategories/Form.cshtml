@@ -1,0 +1,38 @@
+@model TicketResell.Models.Category
+
+@{
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "New category" : "Edit category";
+}
+
+<a asp-action="Index" class="back-link">← Categories</a>
+
+<div class="form-narrow">
+    <h1 class="page-title">@(isNew ? "New category" : "Edit category")</h1>
+
+    <form method="post" class="mt-4">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description"></span>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@(isNew ? "Create category" : "Save changes")</button>
+            <a asp-action="Index" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

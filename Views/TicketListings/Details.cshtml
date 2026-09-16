@@ -1,0 +1,79 @@
+@model TicketResell.Models.TicketListing
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = Model.Event?.Title ?? "Listing";
+    var isOwner = Model.SellerId == UserManager.GetUserId(User);
+    var eventUpcoming = Model.Event?.StartsAt > DateTime.Now;
+    var buyable = Model.Status == ListingStatus.Active && Model.Quantity > 0 && eventUpcoming;
+}
+
+<a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId" class="back-link">← More tickets for this event</a>
+
+<div class="detail-grid">
+    <div>
+        <h1 class="page-title">@Model.Event?.Title</h1>
+        <p class="page-subtitle">@Model.Event?.Description</p>
+
+        <dl class="meta-list">
+            <dt>Date</dt>
+            <dd>
+                @Model.Event?.StartsAt.ToString("dddd d MMMM yyyy, HH:mm")
+                @if (!eventUpcoming)
+                {
+                    <span class="subtle"> · already started</span>
+                }
+            </dd>
+
+            <dt>Venue</dt>
+            <dd>
+                @Model.Event?.Venue?.Name
+                <div class="subtle">@Model.Event?.Venue?.Address, @Model.Event?.Venue?.City</div>
+            </dd>
+
+            <dt>Seat</dt>
+            <dd>@Model.SeatDescription</dd>
+
+            <dt>Seller</dt>
+            <dd>@(isOwner ? "You" : $"{Model.Seller?.FirstName} {Model.Seller?.LastName}")</dd>
+
+            <dt>Listed</dt>
+            <dd>@Model.CreatedAt.ToString("d MMMM yyyy")</dd>
+        </dl>
+    </div>
+
+    <aside class="panel">
+        <div class="panel-price">@Model.PricePerTicket.ToString("C")</div>
+        <div class="muted mt-1">per ticket · @Model.Quantity available</div>
+
+        @if (Model.Status != ListingStatus.Active)
+        {
+            <div class="mt-3">
+                <span class="status status-@Model.Status.ToString().ToLowerInvariant()">@Model.Status</span>
+            </div>
+        }
+
+        <div class="panel-actions">
+            @if (isOwner)
+            {
+                if (Model.Status != ListingStatus.Cancelled && eventUpcoming)
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">Edit listing</a>
+                }
+                if (Model.Status == ListingStatus.Active)
+                {
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-quiet-danger">Cancel listing</a>
+                }
+            }
+            else if (buyable)
+            {
+                <a asp-controller="Orders" asp-action="Buy" asp-route-id="@Model.Id" class="btn btn-primary">Buy tickets</a>
+            }
+            else
+            {
+                <p class="muted mb-0">These tickets are no longer available.</p>
+            }
+        </div>
+    </aside>
+</div>

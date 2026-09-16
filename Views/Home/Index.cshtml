@@ -1,0 +1,64 @@
+﻿@model IEnumerable<UpcomingEvent>
+
+@{
+    ViewData["Title"] = "Resale tickets";
+}
+
+<section class="intro">
+    <h1>Tickets from people who can't make it.</h1>
+    <p>Pick up spare seats for concerts, matches and theatre nights, or sell the ones you won't use.</p>
+
+    <form asp-controller="Events" asp-action="Index" method="get" class="search-bar">
+        <input type="search" name="q" class="form-control" placeholder="Search event, venue or city" aria-label="Search events" />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <p class="search-alt">
+        or <a asp-controller="Events" asp-action="Index">browse every event</a> ·
+        <a asp-controller="TicketListings" asp-action="Create">sell your tickets</a>
+    </p>
+</section>
+
+<section>
+    <div class="section-head">
+        <h2 class="section-title">Happening soon</h2>
+        <a asp-controller="Events" asp-action="Index" class="quiet-link">All events</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty">No upcoming events yet.</div>
+    }
+    else
+    {
+        <ul class="event-list">
+            @foreach (var item in Model)
+            {
+                var e = item.Event;
+                <li>
+                    <a class="event-row" asp-controller="Events" asp-action="Details" asp-route-id="@e.Id">
+                        <div class="date-tile">
+                            <span class="day">@e.StartsAt.Day</span>
+                            <span class="month">@e.StartsAt.ToString("MMM")</span>
+                        </div>
+                        <div>
+                            <p class="event-title">@e.Title</p>
+                            <p class="event-meta">@e.Category?.Name · @e.Venue?.Name, @e.Venue?.City · @e.StartsAt.ToString("ddd HH:mm")</p>
+                        </div>
+                        <div class="event-aside">
+                            @if (item.LowestPrice is decimal lowest)
+                            {
+                                <div class="price">from @lowest.ToString("C")</div>
+                                <div class="price-note">@item.TicketsAvailable @(item.TicketsAvailable == 1 ? "ticket" : "tickets")</div>
+                            }
+                            else
+                            {
+                                <div class="price-note">No tickets yet</div>
+                            }
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+</section>

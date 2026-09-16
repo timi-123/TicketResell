@@ -1,0 +1,82 @@
+@model TicketResell.Models.TicketListing
+@using System.Globalization
+@using TicketResell.Services
+
+@{
+    ViewData["Title"] = "Buy tickets";
+}
+
+<a asp-controller="TicketListings" asp-action="Details" asp-route-id="@Model.Id" class="back-link">← Back to listing</a>
+
+<div class="detail-grid">
+    <div>
+        <h1 class="page-title">@Model.Event?.Title</h1>
+        <p class="page-subtitle">@Model.Event?.Venue?.Name, @Model.Event?.Venue?.City</p>
+
+        <dl class="meta-list">
+            <dt>Date</dt>
+            <dd>@Model.Event?.StartsAt.ToString("dddd d MMMM yyyy, HH:mm")</dd>
+
+            <dt>Seat</dt>
+            <dd>@Model.SeatDescription</dd>
+
+            <dt>Seller</dt>
+            <dd>@Model.Seller?.FirstName @Model.Seller?.LastName</dd>
+
+            <dt>Price</dt>
+            <dd class="num">@Model.PricePerTicket.ToString("C") per ticket</dd>
+
+            <dt>Available</dt>
+            <dd class="num">@Model.Quantity</dd>
+        </dl>
+    </div>
+
+    <aside class="panel">
+        <form asp-action="Buy" asp-route-id="@Model.Id" method="post">
+            <div asp-validation-summary="All"></div>
+
+            <label for="quantity" class="form-label">Tickets</label>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" max="@Model.Quantity"
+                   data-price="@Model.PricePerTicket.ToString(CultureInfo.InvariantCulture)"
+                   data-fee-rate="@FeeSchedule.BuyerFeeRate.ToString(CultureInfo.InvariantCulture)" class="form-control" />
+
+            <dl class="cost-list">
+                <dt>Tickets</dt>
+                <dd id="subtotal" class="num">@Model.PricePerTicket.ToString("C")</dd>
+
+                <dt>Booking fee</dt>
+                <dd id="fee" class="num">@FeeSchedule.BuyerFee(Model.PricePerTicket).ToString("C")</dd>
+            </dl>
+
+            <div class="total-row">
+                <span class="muted">Total</span>
+                <span id="total" class="panel-price">@((Model.PricePerTicket + FeeSchedule.BuyerFee(Model.PricePerTicket)).ToString("C"))</span>
+            </div>
+
+            <div class="panel-actions mt-0">
+                <button type="submit" class="btn btn-primary">Continue to payment</button>
+            </div>
+        </form>
+    </aside>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const quantity = document.getElementById("quantity");
+            const price = Number(quantity.dataset.price);
+            const feeRate = Number(quantity.dataset.feeRate);
+            const format = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+            const update = () => {
+                const count = Math.max(0, Math.floor(Number(quantity.value) || 0));
+                const subtotal = count * price;
+                const fee = Math.round(subtotal * feeRate * 100) / 100;
+                document.getElementById("subtotal").textContent = format.format(subtotal);
+                document.getElementById("fee").textContent = format.format(fee);
+                document.getElementById("total").textContent = format.format(subtotal + fee);
+            };
+            quantity.addEventListener("input", update);
+            update();
+        })();
+    </script>
+}

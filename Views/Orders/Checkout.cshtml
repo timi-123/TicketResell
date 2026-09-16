@@ -1,0 +1,70 @@
+@model TicketResell.Models.Order
+
+@{
+    ViewData["Title"] = "Payment";
+    var listing = Model.TicketListing;
+}
+
+<a asp-controller="TicketListings" asp-action="Details" asp-route-id="@Model.TicketListingId" class="back-link">← Back to listing</a>
+
+<div class="detail-grid">
+    <div>
+        <h1 class="page-title">Payment</h1>
+        <p class="page-subtitle">
+            This is a simulated checkout. No card is charged and no card details are stored.
+            Any 16-digit number works, a number ending in 0000 is declined.
+        </p>
+
+        <form asp-action="Checkout" asp-route-id="@Model.Id" method="post" class="form-narrow mt-4">
+            <div asp-validation-summary="All"></div>
+
+            <div class="mb-3">
+                <label for="cardName" class="form-label">Name on card</label>
+                <input type="text" id="cardName" name="cardName" class="form-control" autocomplete="off" />
+            </div>
+
+            <div class="mb-3">
+                <label for="cardNumber" class="form-label">Card number</label>
+                <input type="text" id="cardNumber" name="cardNumber" class="form-control" inputmode="numeric"
+                       placeholder="4242 4242 4242 4242" autocomplete="off" />
+            </div>
+
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <label for="expiry" class="form-label">Expiry</label>
+                    <input type="text" id="expiry" name="expiry" class="form-control" placeholder="MM/YY" autocomplete="off" />
+                </div>
+                <div class="col-sm-6">
+                    <label for="cvc" class="form-label">Security code</label>
+                    <input type="text" id="cvc" name="cvc" class="form-control" inputmode="numeric" placeholder="123" autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Pay @Model.TotalPrice.ToString("C")</button>
+                <a asp-controller="TicketListings" asp-action="Details" asp-route-id="@Model.TicketListingId" class="btn btn-link">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <aside class="panel">
+        <h2 class="section-title">@listing?.Event?.Title</h2>
+        <p class="event-meta">
+            @listing?.Event?.StartsAt.ToString("ddd d MMM yyyy, HH:mm")<br />
+            @listing?.Event?.Venue?.Name · @listing?.SeatDescription
+        </p>
+
+        <dl class="cost-list">
+            <dt>@Model.Quantity × @listing?.PricePerTicket.ToString("C")</dt>
+            <dd class="num">@Model.SubtotalPrice.ToString("C")</dd>
+
+            <dt>Booking fee</dt>
+            <dd class="num">@Model.BuyerFee.ToString("C")</dd>
+        </dl>
+
+        <div class="total-row">
+            <span class="muted">Total</span>
+            <span class="panel-price">@Model.TotalPrice.ToString("C")</span>
+        </div>
+    </aside>
+</div>

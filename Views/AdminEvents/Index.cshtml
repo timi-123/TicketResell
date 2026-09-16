@@ -1,0 +1,67 @@
+@model IEnumerable<TicketResell.Models.Event>
+
+@{
+    ViewData["Title"] = "Events";
+    var now = DateTime.Now;
+}
+
+<a asp-controller="Admin" asp-action="Index" class="back-link">← Admin</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Events</h1>
+        <p class="page-subtitle">The catalogue people search and sell against.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">New event</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">No events yet. <a asp-action="Create">Add the first one</a>.</div>
+}
+else
+{
+    <div class="table-scroll">
+        <table class="table-clean">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Venue</th>
+                    <th>Category</th>
+                    <th>Starts</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="cell-title">@item.Title</div>
+                        <div class="cell-sub">@item.Description</div>
+                    </td>
+                    <td>
+                        <div>@item.Venue?.Name</div>
+                        <div class="cell-sub">@item.Venue?.City</div>
+                    </td>
+                    <td>@item.Category?.Name</td>
+                    <td>
+                        <div class="num">@item.StartsAt.ToString("d MMM yyyy, HH:mm")</div>
+                        @if (item.StartsAt <= now)
+                        {
+                            <div class="cell-sub">past</div>
+                        }
+                    </td>
+                    <td class="end text-nowrap">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this event?');">
+                            <button type="submit" class="btn btn-sm btn-quiet-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,82 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    string ActiveIf(string controller, string action)
+    {
+        return currentController == controller && currentAction == action ? "active" : "";
+    }
+
+    var adminActive = ActiveIf("Admin", "Index");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - TicketResell</title>
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/site.css"/>
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar navbar-expand-md">
+        <div class="container">
+            <a class="brand" asp-area="" asp-controller="Home" asp-action="Index">TicketResell</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav"
+                    aria-controls="siteNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="siteNav">
+                <ul class="navbar-nav site-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link @ActiveIf("Events", "Index")" asp-area="" asp-controller="Events" asp-action="Index">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @ActiveIf("TicketListings", "Index")" asp-area="" asp-controller="TicketListings" asp-action="Index">All tickets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @ActiveIf("TicketListings", "Create")" asp-area="" asp-controller="TicketListings" asp-action="Create">Sell</a>
+                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link @adminActive" asp-controller="Admin" asp-action="Index">Admin</a>
+                        </li>
+                    }
+                </ul>
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main role="main" class="site-main">
+    <div class="container">
+        @if (TempData["Error"] is string errorMessage)
+        {
+            <div class="flash flash-error" role="alert">@errorMessage</div>
+        }
+        else if (TempData["Message"] is string message)
+        {
+            <div class="flash flash-success" role="status">@message</div>
+        }
+        @RenderBody()
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container d-flex justify-content-between">
+        <span>&copy; 2026 TicketResell</span>
+        <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </div>
+</footer>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

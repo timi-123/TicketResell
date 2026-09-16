@@ -1,0 +1,65 @@
+@model IEnumerable<TicketResell.Models.TicketListing>
+
+@{
+    ViewData["Title"] = "Listings";
+}
+
+<a asp-action="Index" class="back-link">← Admin</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Listings</h1>
+        <p class="page-subtitle">Everything people have listed, newest first.</p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty">Nobody has listed tickets yet.</div>
+}
+else
+{
+    <div class="table-scroll">
+        <table class="table-clean">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Seller</th>
+                    <th class="end">Price</th>
+                    <th class="end">Left</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var listing in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="cell-title">
+                            <a asp-controller="TicketListings" asp-action="Details" asp-route-id="@listing.Id">@listing.Event?.Title</a>
+                        </div>
+                        <div class="cell-sub">@listing.Event?.Venue?.Name · @listing.SeatDescription</div>
+                    </td>
+                    <td>
+                        <div>@listing.Seller?.FirstName @listing.Seller?.LastName</div>
+                        <div class="cell-sub">@listing.Seller?.Email</div>
+                    </td>
+                    <td class="end">@listing.PricePerTicket.ToString("C")</td>
+                    <td class="end">@listing.Quantity</td>
+                    <td><span class="status status-@listing.Status.ToString().ToLowerInvariant()">@listing.Status</span></td>
+                    <td class="end">
+                        @if (listing.Status == ListingStatus.Active)
+                        {
+                            <form asp-action="CancelListing" asp-route-id="@listing.Id" method="post"
+                                  onsubmit="return confirm('Take this listing off sale?');">
+                                <button type="submit" class="btn btn-sm btn-quiet-danger">Take down</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,51 @@
+@model TicketResell.Models.Venue
+
+@{
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "New venue" : "Edit venue";
+}
+
+<a asp-action="Index" class="back-link">← Venues</a>
+
+<div class="form-narrow">
+    <h1 class="page-title">@(isNew ? "New venue" : "Edit venue")</h1>
+
+    <form method="post" class="mt-4">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Address" class="form-label">Address</label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-sm-7">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City"></span>
+            </div>
+            <div class="col-sm-5">
+                <label asp-for="Capacity" class="form-label">Capacity</label>
+                <input asp-for="Capacity" class="form-control" />
+                <span asp-validation-for="Capacity"></span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@(isNew ? "Create venue" : "Save changes")</button>
+            <a asp-action="Index" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

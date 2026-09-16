@@ -1,0 +1,46 @@
+@model TicketResell.Models.Order
+
+@{
+    ViewData["Title"] = "Send tickets";
+    var listing = Model.TicketListing;
+    var eventTitle = listing?.Event?.Title;
+}
+
+<a asp-action="Details" asp-route-id="@Model.Id" class="back-link">← Back to order</a>
+
+<div class="form-narrow">
+    <h1 class="page-title">Send tickets</h1>
+    <p class="page-subtitle">
+        Upload the tickets for order #@Model.Id — @Model.Quantity ticket(s) for <strong>@eventTitle</strong>.
+        The buyer can download them as soon as you upload.
+    </p>
+
+    @if (Model.TicketFiles.Any())
+    {
+        <ul class="file-list mt-4">
+            @foreach (var file in Model.TicketFiles.OrderBy(f => f.UploadedAt))
+            {
+                var sizeLabel = file.SizeBytes < 1024
+                    ? $"{file.SizeBytes} B"
+                    : $"{Math.Round(file.SizeBytes / 1024d)} KB";
+                <li>
+                    <a asp-action="Download" asp-route-id="@file.Id">@file.FileName</a>
+                    <span class="subtle">@sizeLabel</span>
+                </li>
+            }
+        </ul>
+    }
+
+    <form asp-action="Deliver" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="mt-4">
+        @Html.ValidationSummary(false)
+
+        <label for="tickets" class="form-label">Ticket files</label>
+        <input type="file" id="tickets" name="tickets" class="form-control" multiple accept=".pdf,.png,.jpg,.jpeg" />
+        <p class="form-hint">PDF, PNG or JPG, up to 5 MB each, at most @Model.Quantity file(s) in total.</p>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Upload and send</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</div>
